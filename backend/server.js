@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 // const cors = require("cors");
@@ -17,13 +18,21 @@ const app = express();
 
 app.use(express.json());
 
+const MONGODB_URI = process.env.MONGODB_URI;
+
 mongoose
-  .connect("mongodb://localhost:27017/travel_agency", {
+  .connect(MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("Could not connect to MongoDB:", err));
+  .then(() => {
+    console.log("Connected to MongoDB successfully");
+    return seedData();
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+    process.exit(1);
+  });
 
 app.use("/api/destinations", destinationsRouter);
 app.use("/api/packages", packagesRouter);
@@ -111,8 +120,6 @@ const seedData = async () => {
     console.error("Error seeding data:", error);
   }
 };
-
-seedData();
 
 const PORT = process.env.PORT || 5069;
 app.listen(PORT, () => {
